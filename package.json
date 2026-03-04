@@ -1,0 +1,35 @@
+{
+  "name": "salon-booking-backend",
+  "version": "1.0.0",
+  "description": "Salon booking system backend API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js --host 0.0.0.0",
+    "consumers": "node consumers/index.js",
+    "dev:consumers": "nodemon consumers/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "salon",
+    "booking",
+    "appointment"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.9",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.0.0",
+    "nodemailer": "^8.0.1",
+    "twilio": "^5.12.2",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
