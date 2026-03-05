@@ -49,7 +49,12 @@ app.use(express.json());
 const connectDB = require('./config/db');
 connectDB();
 
-const { connectRabbitMQ } = require('./config/rabbitmq');
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Salon Booking API is running!',
+    version: '2.0.0'
+  });
+});
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -60,29 +65,10 @@ app.use('/api/payments', require('./routes/payments'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/config', require('./routes/config'));  // ← ADD THIS
 
-// Health Check
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Salon Booking API is running!',
-    version: '2.0.0',
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
-
-// Error handling middleware
+// Error handler
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({ 
-    message: 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
+  console.error('Error:', err.message);
+  res.status(500).json({ message: 'Server error' });
 });
 
-// Start Server (only in development, not on Vercel)
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-  });
-}
 module.exports = app;

@@ -1,4 +1,3 @@
-// services/eventPublisher.js
 const { v4: uuidv4 } = require('uuid');
 const { getChannel } = require('../config/rabbitmq');
 const { QUEUES } = require('../utils/events');
@@ -10,8 +9,7 @@ class EventPublisher {
       const channel = await getChannel();
       
       if (!channel) {
-        console.warn('⚠️  RabbitMQ not available. Event will not be published:', eventType);
-        console.warn('   This is normal on Vercel. Deploy consumers to Railway to process events.');
+        console.warn('⚠️ RabbitMQ unavailable, event not published:', eventType);
         return false;
       }
 
@@ -31,9 +29,7 @@ class EventPublisher {
 
       return true;
     } catch (error) {
-      console.error('❌ Failed to publish event:', error.message);
-      console.error('   Event type:', eventType);
-      console.error('   This is OK on Vercel. Events will be processed when consumers are running on Railway.');
+      console.error('❌ Publish failed:', error.message);
       return false;
     }
   }

@@ -1,56 +1,41 @@
-// config/rabbitmq.js
 const amqp = require('amqplib');
 
 let connection = null;
 let channel = null;
 
-const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://localhost';
+const RABBITMQ_URL = process.env.RABBITMQ_URL;
 const QUEUE_EMAIL = 'email.queue';
 const QUEUE_SMS = 'sms.queue';
 
 const connectRabbitMQ = async () => {
   try {
-    // If already connected, return existing connection
+    // Skip if no URL (Vercel serverless won't have this)
+    if (!RABBITMQ_URL) {
+      console.warn('⚠️ RABBITMQ_URL not set, skipping connection');
+      return { connection: null, channel: null };
+    }
+
+    // If already connected, return existing
     if (connection && channel) {
       return { connection, channel };
     }
 
-    // Skip connection if RABBITMQ_URL is not set
-    if (!RABBITMQ_URL || RABBITMQ_URL === 'amqp://localhost') {
-      console.warn('⚠️  RABBITMQ_URL not configured. Skipping RabbitMQ connection.');
-      return { connection: null, channel: null };
-    }
-
     console.log('🔌 Connecting to RabbitMQ...');
     
-    // Create connection with timeout
-    connection = await Promise.race([
-      amqp.connect(RABBITMQ_URL),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('RabbitMQ connection timeout')), 5000)
-      )
-    ]);
-    
-    console.log('✅ RabbitMQ connection established');
-
-    // Create channel
+    connection = await amqp.connect(RABBITMQ_URL);
     channel = await connection.createChannel();
-    console.log('✅ RabbitMQ channel created');
 
-    // Declare queues
     await channel.assertQueue(QUEUE_EMAIL, { durable: true });
     await channel.assertQueue(QUEUE_SMS, { durable: true });
-    console.log('✅ Queues declared');
 
-    // Handle errors
     connection.on('error', (err) => {
-      console.error('❌ RabbitMQ connection error:', err.message);
+      console.error('❌ RabbitMQ error:', err.message);
       connection = null;
       channel = null;
     });
 
     connection.on('close', () => {
-      console.warn('⚠️  RabbitMQ connection closed');
+      console.warn('⚠️ RabbitMQ closed');
       connection = null;
       channel = null;
     });
@@ -59,10 +44,7 @@ const connectRabbitMQ = async () => {
     return { connection, channel };
 
   } catch (error) {
-    console.warn('⚠️  RabbitMQ connection failed:', error.message);
-    console.warn('   Continuing without RabbitMQ. Events will not be published.');
-    connection = null;
-    channel = null;
+    console.warn('⚠️ RabbitMQ connection failed:', error.message);
     return { connection: null, channel: null };
   }
 };
