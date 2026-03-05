@@ -1,4 +1,5 @@
-// consumers/index.js
+require('dotenv').config(); // ← ADD THIS LINE AT THE TOP
+
 const { connectRabbitMQ } = require('../config/rabbitmq');
 const emailConsumer = require('./emailConsumer');
 const smsConsumer = require('./smsConsumer');
@@ -13,6 +14,8 @@ async function startAllConsumers() {
   try {
     // Connect to RabbitMQ
     console.log('🔌 Connecting to RabbitMQ...');
+    console.log('RABBITMQ_URL exists:', !!process.env.RABBITMQ_URL); // Debug log
+    
     const { connection, channel } = await connectRabbitMQ();
     
     if (!connection || !channel) {
@@ -40,6 +43,11 @@ async function startAllConsumers() {
     console.error('');
     console.error('❌ FATAL ERROR:');
     console.error(error);
+    console.error('');
+    console.error('💡 Make sure:');
+    console.error('   1. .env file exists in backend root');
+    console.error('   2. RABBITMQ_URL is set in .env');
+    console.error('   3. RabbitMQ service is accessible');
     console.error('');
     process.exit(1);
   }
